@@ -4,31 +4,32 @@ from __future__ import print_function
 
 import os
 import socket
-import tarfile
-import tempfile
-import time
 
 import boto
+from sos.sosreport import SoSReport
+
+s3 = boto.connect_s3()
+
+def get_bucket():
+    return s3.create_bucket(os.environ['S3S_BUCKET'])
 
 def get_key():
-    c = boto.connect_s3()
-    bucket = c.create_bucket(os.environ['S3S_BUCKET'])
-    key = boto.s3.key.Key(bucket)
-    hostname = socket.gethostname()
-    timestamp = str(int(time.time()))
-    key.key = '%s-%s.tar.gz' % (hostname, timestamp)
-    return key
-
-def get_archive():
-    temp = tempfile.mktemp()
-    tar = tarfile.open(temp, 'w:gz')
-    tar.add('/tmp/s3s')
-    tar.close()
-    return temp
+    return boto.s3.key.Key(get_bucket())
 
 if __name__ == '__main__':
+    # Grab an S3 key before running sosreport
     key = get_key()
-    key.set_contents_from_filename(get_archive())
+
+    # Run sosreport in batch mode
+    sos = SoSReport(['--batch'])
+    sos.execute()
+
+    # Set the key name to the sosreport archive name
+    archive = sos.archive.name()
+    key.key = os.path.split(archive)[-1]
+
+    # Upload the sosreport archive to S3
+    key.set_contents_from_filename(archive)
 
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
