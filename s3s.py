@@ -23,26 +23,43 @@ from docopt import docopt
 from sos.sosreport import SoSReport
 
 def get_instance_id():
+    """
+    Returns EC2 instance id of local host.
+    """
     return boto.utils.get_instance_metadata()['instance-id']
 
 def get_key(bucket):
+    """
+    Returns a S3 Key object in the provided bucket.
+    """
     c = boto.connect_s3()
     b = c.create_bucket(bucket)
     return boto.s3.key.Key(b)
 
 def get_queue(queue):
+    """
+    Returns the SQS Queue object.
+    """
     c = boto.sqs.connect_to_region(get_region())
     q = c.get_queue(queue)
     q.set_message_class(boto.sqs.message.RawMessage)
     return q
 
 def get_region():
+    """
+    Returns the EC2 region of the local host.
+    """
     return boto.utils.get_instance_identity()['document']['region']
 
 def is_local_termination(message):
+    """
+    Returns True if the SQS message is the instance termination of the local host.
+    """
     payload = json.loads(message.get_body())
 
+    # Check the instance ID matches
     if payload['EC2InstanceId'] == get_instance_id():
+        # Check the message is for instance termination
         if payload['LifecycleTransition'] == 'autoscaling:EC2_INSTANCE_TERMINATING':
             return True
 
