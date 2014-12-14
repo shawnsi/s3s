@@ -17,6 +17,7 @@ eggs/
 include/
 lib/
 lib64/
+man/
 parts/
 sdist/
 share/

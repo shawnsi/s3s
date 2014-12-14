@@ -55,13 +55,18 @@ def is_local_termination(message):
     """
     Returns True if the SQS message is the instance termination of the local host.
     """
-    payload = json.loads(message.get_body())
+    try:
+        payload = json.loads(message.get_body())
+    except ValueError:
+        return False
 
-    # Check the instance ID matches
-    if payload['EC2InstanceId'] == get_instance_id():
-        # Check the message is for instance termination
-        if payload['LifecycleTransition'] == 'autoscaling:EC2_INSTANCE_TERMINATING':
-            return True
+    if payload.get('EC2InstanceId') != get_instance_id():
+        return False
+
+    if payload.get('LifecycleTransition') != 'autoscaling:EC2_INSTANCE_TERMINATING':
+        return False
+
+    return True
 
 def upload(bucket):
     # Grab an S3 key before running sosreport
