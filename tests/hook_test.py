@@ -5,7 +5,7 @@ import mock
 from s3s import is_local_termination
 
 
-class S3STestCase(unittest.TestCase):
+class HookTestCase(unittest.TestCase):
     """Tests for config.py"""
 
     def setUp(self):
