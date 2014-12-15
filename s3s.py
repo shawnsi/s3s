@@ -28,20 +28,20 @@ def get_instance_id():
     """
     return boto.utils.get_instance_metadata()['instance-id']
 
-def get_key(bucket):
+def get_bucket_key(name):
     """
     Returns a S3 Key object in the provided bucket.
     """
     c = boto.connect_s3()
-    b = c.create_bucket(bucket)
+    b = c.create_bucket(name)
     return boto.s3.key.Key(b)
 
-def get_queue(queue):
+def get_queue(name):
     """
     Returns the SQS Queue object.
     """
     c = boto.sqs.connect_to_region(get_region())
-    q = c.get_queue(queue)
+    q = c.get_queue(name)
     q.set_message_class(boto.sqs.message.RawMessage)
     return q
 
@@ -70,7 +70,7 @@ def is_local_termination(message):
 
 def upload(bucket):
     # Grab an S3 key before running sosreport
-    key = get_key(bucket)
+    key = get_bucket_key(bucket)
 
     # Run sosreport in batch mode
     sos = SoSReport(['--batch'])
