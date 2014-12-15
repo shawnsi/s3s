@@ -1,6 +1,8 @@
 s3s
 ===
 
+[![Build Status](https://travis-ci.org/shawnsi/s3s.png)](https://travis-ci.org/shawnsi/s3s)
+
 Upload System Data to S3
 
 Intro
